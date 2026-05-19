@@ -53,14 +53,14 @@ if st.button("🚀 Gerar Orçamento em PDF", use_container_width=True):
     else:
         with st.spinner("Processando documento e convertendo para PDF na nuvem..."):
             try:
-               itens_template = []
-               for _, row in tabela_editavel.iterrows():
+                itens_template = []
+                for _, row in tabela_editavel.iterrows():
                     itens_template.append({
                         "nome": row["Item"],
                         "qtd": int(row["Quantidade"]),
-                        "preco": f"{row['Preço Unitário (R$)']:.2f}",  # <--- Corrigido aqui!
+                        "preco": f"{row['Preço Unitário (R$)']:.2f}",
                         "total": f"{row['Total Linha']:.2f}"
-    })
+                    })
 
                 dados_contexto = {
                     "cliente": cliente,
