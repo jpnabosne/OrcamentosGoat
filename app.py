@@ -22,7 +22,6 @@ with col2:
     data = st.text_input("Data do Orçamento", value=data_atual)
     fone = st.text_input("Telefone / Fone", value="(11) 99999-9999")
 
-# Campo de endereço ocupando a largura total abaixo das colunas
 endereco = st.text_input("Endereço Completo", value="Rua Exemplo, nº 123 - São Paulo/SP")
 
 # --- TABELA DE ITENS ---
@@ -44,10 +43,22 @@ tabela_editavel = st.data_editor(
     hide_index=True,
 )
 
+# --- NOVOS CÁLCULOS COM IMPOSTO (6%) ---
 tabela_editavel["Total Linha"] = tabela_editavel["Quantidade"] * tabela_editavel["Preço Unitário (R$)"]
-total_geral = tabela_editavel["Total Linha"].sum()
+subtotal = tabela_editavel["Total Linha"].sum()
+imposto = subtotal * 0.06
+total_geral = subtotal + imposto
 
-st.markdown(f"### **Valor Total: R$ {total_geral:,.2f}**")
+# Exibição organizada dos valores na tela
+st.markdown("---")
+col_sub, col_imp, col_tot = st.columns(3)
+with col_sub:
+    st.metric("Subtotal dos Itens", f"R$ {subtotal:,.2f}")
+with col_imp:
+    st.metric("Imposto NF (6%)", f"R$ {imposto:,.2f}")
+with col_tot:
+    st.metric("Valor Total Geral", f"R$ {total_geral:,.2f}")
+st.markdown("---")
 
 # --- GERADOR ---
 st.subheader("3. Gerar Documento")
@@ -67,7 +78,7 @@ if st.button("🚀 Gerar Orçamento em PDF", use_container_width=True):
                         "total": f"{row['Total Linha']:.2f}"
                     })
 
-                # Adicionado os novos campos no dicionário que vai para o Word
+                # Adicionado os campos de imposto e subtotal no contexto do Word
                 dados_contexto = {
                     "cliente": cliente,
                     "cnpj": cnpj,
@@ -75,6 +86,8 @@ if st.button("🚀 Gerar Orçamento em PDF", use_container_width=True):
                     "fone": fone,
                     "data": data,
                     "itens": itens_template,
+                    "subtotal": f"{subtotal:.2f}",
+                    "imposto": f"{imposto:.2f}",
                     "total_geral": f"{total_geral:.2f}"
                 }
 
@@ -89,11 +102,9 @@ if st.button("🚀 Gerar Orçamento em PDF", use_container_width=True):
                 # Conversão utilizando o LibreOffice Headless (Padrão Linux Cloud)
                 subprocess.run(["libreoffice", "--headless", "--convert-to", "pdf", nome_docx], check=True)
                 
-                # O LibreOffice gera por padrão um arquivo chamado 'orcamento_temp.pdf'
                 if os.path.exists("orcamento_temp.pdf"):
                     os.rename("orcamento_temp.pdf", nome_pdf)
 
-                # Fornece o arquivo para download no navegador
                 with open(nome_pdf, "rb") as f:
                     pdf_bytes = f.read()
 
@@ -106,7 +117,6 @@ if st.button("🚀 Gerar Orçamento em PDF", use_container_width=True):
                     use_container_width=True
                 )
 
-                # Limpa os arquivos temporários do servidor
                 if os.path.exists(nome_docx): os.remove(nome_docx)
                 if os.path.exists(nome_pdf): os.remove(nome_pdf)
 
