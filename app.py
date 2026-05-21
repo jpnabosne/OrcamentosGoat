@@ -16,9 +16,14 @@ col1, col2 = st.columns(2)
 
 with col1:
     cliente = st.text_input("Nome do Cliente / Empresa", value="Empresa Exemplo LTDA")
+    cnpj = st.text_input("CNPJ", value="00.000.000/0001-00")
 with col2:
     data_atual = datetime.now().strftime("%d/%m/%Y")
     data = st.text_input("Data do Orçamento", value=data_atual)
+    fone = st.text_input("Telefone / Fone", value="(11) 99999-9999")
+
+# Campo de endereço ocupando a largura total abaixo das colunas
+endereco = st.text_input("Endereço Completo", value="Rua Exemplo, nº 123 - São Paulo/SP")
 
 # --- TABELA DE ITENS ---
 st.subheader("2. Itens do Orçamento")
@@ -62,8 +67,12 @@ if st.button("🚀 Gerar Orçamento em PDF", use_container_width=True):
                         "total": f"{row['Total Linha']:.2f}"
                     })
 
+                # Adicionado os novos campos no dicionário que vai para o Word
                 dados_contexto = {
                     "cliente": cliente,
+                    "cnpj": cnpj,
+                    "endereco": endereco,
+                    "fone": fone,
                     "data": data,
                     "itens": itens_template,
                     "total_geral": f"{total_geral:.2f}"
